@@ -1,7 +1,7 @@
 {
   "exe": "c:\\balabolka_console\\balabolka_console.exe",
   "params": [
-    "-enc unicode"
+    "-enc utf8"
   ],
   "defaultVoice": "Elena",
   "tmpDir": "c:\\tmp",

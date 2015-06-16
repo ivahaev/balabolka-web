@@ -6,7 +6,9 @@ import (
 	"github.com/ivahaev/balabolka-web/config"
 	"github.com/ivahaev/balabolka-web/utils/hash"
 	"github.com/ivahaev/go-logger"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -22,15 +24,31 @@ func synthHandler(w http.ResponseWriter, r *http.Request) {
 		voice = config.Config.DefaultVoice
 	}
 	params := r.URL.Query().Get("params")
-	fileName := config.Config.TmpDir + `\` + hash.New(text) + ".wav"
-	params += strings.Join(config.Config.Params, " ")
-	cmd := exec.Command("cmd", "/C "+config.Config.Exe+` -w `+fileName+` -n `+voice+` -t "`+text+`" `+params)
-	res, err := cmd.CombinedOutput()
+	baseFileName := config.Config.TmpDir + `\` + hash.New(text)
+	wavFileName := baseFileName + ".wav"
+	txtFileName := baseFileName + ".txt"
+	err := ioutil.WriteFile(txtFileName, []byte(text), 0644)
 	if err != nil {
-		http.Error(w, "Server error. Can't exec: "+err.Error()+"\n "+res, 500)
+		http.Error(w, "Server error. Can't write file: "+err.Error(), 500)
 		return
 	}
-	http.ServeFile(w, r, fileName)
+	params += strings.Join(config.Config.Params, " ")
+	command := "/C " + config.Config.Exe + ` -w ` + wavFileName + ` -n ` + voice + ` -f ` + txtFileName + ` ` + params
+	cmd := exec.Command("cmd", command)
+	res, err := cmd.CombinedOutput()
+	if err != nil {
+		http.Error(w, "Server error. Can't exec: "+err.Error()+"\n "+string(res), 500)
+		return
+	}
+	http.ServeFile(w, r, wavFileName)
+	err = os.Remove(txtFileName)
+	if err != nil {
+		logger.Error("Can't remove txt file")
+	}
+	err = os.Remove(wavFileName)
+	if err != nil {
+		logger.Error("Can't remove wav file")
+	}
 }
 
 func voicesHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +76,6 @@ func voicesHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	logger.Info("App started")
-	logger.Debug(config.Config)
 	http.HandleFunc("/voices", voicesHandler)
 	http.HandleFunc("/synth", synthHandler)
 	http.ListenAndServe(":"+config.Config.Port, nil)
