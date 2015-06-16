@@ -17,17 +17,17 @@ func synthHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No text param", 400)
 		return
 	}
-    voice := r.URL.Query().Get("voice")
-    if voice == "" {
-        voice = config.Config.DefaultVoice
-    }
-    params := r.URL.Query().Get("params")
+	voice := r.URL.Query().Get("voice")
+	if voice == "" {
+		voice = config.Config.DefaultVoice
+	}
+	params := r.URL.Query().Get("params")
 	fileName := config.Config.TmpDir + `\` + hash.New(text) + ".wav"
 	params += strings.Join(config.Config.Params, " ")
-	cmd := exec.Command("cmd", "/C "+config.Config.Exe+` -w `+fileName+` -n `+voice+` -t "`+text+`" `+ params)
+	cmd := exec.Command("cmd", "/C "+config.Config.Exe+` -w `+fileName+` -n `+voice+` -t "`+text+`" `+params)
 	res, err := cmd.CombinedOutput()
 	if err != nil {
-		http.Error(w, "Server error. Can't exec: " + err.Error() + "\n " + res, 500)
+		http.Error(w, "Server error. Can't exec: "+err.Error()+"\n "+res, 500)
 		return
 	}
 	http.ServeFile(w, r, fileName)
