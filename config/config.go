@@ -10,7 +10,7 @@ import (
 
 var (
 	confFile *string
-	Config   Conf
+	C Conf
 )
 
 type Conf struct {
@@ -22,14 +22,14 @@ type Conf struct {
 }
 
 func mustReadConfig() {
-	Config = Conf{}
+	C = Conf{}
 	logger.Info("Will load config from: " + *confFile)
 	file, err := ioutil.ReadFile(*confFile)
 	if err != nil {
 		panic(fmt.Sprintf("Config file read error: %v\n", err.Error()))
 	}
 
-	err = json.Unmarshal(file, &Config)
+	err = json.Unmarshal(file, &C)
 	if err != nil {
 		panic(fmt.Sprintf("Can't decode config: %v\n", err.Error()))
 	}
