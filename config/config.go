@@ -10,7 +10,7 @@ import (
 
 var (
 	confFile *string
-	C Conf
+	C        Conf
 )
 
 type Conf struct {

@@ -4,22 +4,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ivahaev/balabolka-web/config"
+	"github.com/ivahaev/balabolka-web/utils/uuid"
 	"github.com/ivahaev/go-logger"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
-    "github.com/ivahaev/balabolka-web/utils/uuid"
 )
 
 func removeTmpFiles(files ...string) {
-    for _, f := range files {
-        err := os.Remove(f)
-        if err != nil {
-            logger.Error("Can't remove file: " + f)
-        }
-    }
+	for _, f := range files {
+		err := os.Remove(f)
+		if err != nil {
+			logger.Error("Can't remove file: " + f)
+		}
+	}
 }
 
 func synthHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +36,7 @@ func synthHandler(w http.ResponseWriter, r *http.Request) {
 	baseFileName := config.C.TmpDir + `\` + uuid.NewV4()
 	wavFileName := baseFileName + ".wav"
 	txtFileName := baseFileName + ".txt"
-    defer removeTmpFiles(wavFileName, txtFileName)
+	defer removeTmpFiles(wavFileName, txtFileName)
 	err := ioutil.WriteFile(txtFileName, []byte(text), 0644)
 	if err != nil {
 		http.Error(w, "Server error. Can't write file: "+err.Error(), 500)
